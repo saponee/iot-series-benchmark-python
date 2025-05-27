@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from device import Device
 from sensors import connect_to_influx, connect_to_timescale, send_batch_to_influxdb, send_batch_to_timescaledb
 
-BATCH_SIZE = 5000
+BATCH_SIZE = 100
 TEST_VOLUMES = [1, 10, 100, 10000, 50000, 100000]
 REPEAT_PER_TEST = 3  # Numero di ripetizioni per ogni test
 
