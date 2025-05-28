@@ -4,37 +4,45 @@ import seaborn as sns
 import os
 
 def analyze_and_plot_results(file_path='performance_results.csv'):
+    """
+    Gestisce la lettura del file .csv eseguendone la media per ciascun
+    test eseguito e dopodichè genera i grafici per entrambi.
+
+    """
+
+
+
     # Nomi dei file dei grafici come verranno salvati
     plot_duration_file = 'average_duration_plot.png'
     plot_throughput_file = 'average_throughput_plot.png'
 
     # Flag per verificare se entrambi i file sono stati trovati e rimossi
-    removed_file1 = False
-    removed_file2 = False
+    removed_plot_duration_file = False
+    removed_plot_throughput_file = False
 
-    # Tentativo di rimuovere il primo file
+    # Tentativo di rimozione di "average_duration_plot.png"
     if os.path.exists(plot_duration_file):
         try:
             os.remove(plot_duration_file)
-            removed_file1 = True
+            removed_plot_duration_file = True
         except OSError as e: # Cattura errori specifici di OS (es. file in uso)
             print(f"⚠️ Attenzione: Impossibile rimuovere '{plot_duration_file}': {e}")
-            removed_file1 = False # Assicurati che il flag sia False in caso di errore
+            removed_plot_duration_file = False # Assicurati che il flag sia False in caso di errore
 
-    # Tentativo di rimuovere il secondo file
+    # Tentativo di rimozione di "average_throughput_plot.png"
     if os.path.exists(plot_throughput_file):
         try:
             os.remove(plot_throughput_file)
-            removed_file2 = True
+            removed_plot_throughput_file = True
         except OSError as e:
             print(f"⚠️ Attenzione: Impossibile rimuovere '{plot_throughput_file}': {e}")
-            removed_file2 = False # Assicurati che il flag sia False in caso di errore
+            removed_plot_throughput_file = False # Assicurati che il flag sia False in caso di errore
 
-    # Stampa il messaggio di conferma SOLO SE entrambi i file sono stati rimossi con successo
-    if removed_file1 and removed_file2:
+    # Stampa il messaggio di conferma di rimozione SOLO SE entrambi i file sono stati rimossi con successo
+    if removed_plot_duration_file and removed_plot_throughput_file:
         print(f"🗑️ Files '{plot_duration_file}' e '{plot_throughput_file}' precedenti rimossi.")
-    elif removed_file1 or removed_file2:
-        print("🗑️ Almeno uno dei file dei grafici precedenti è stato rimosso. Controlla i messaggi di attenzione per dettagli.")
+    elif removed_plot_duration_file or removed_plot_throughput_file:
+        print("🗑️ Solo uno dei file dei grafici precedenti è stato rimosso. Controlla i messaggi di attenzione per dettagli.")
 
 
     if not os.path.exists(file_path):
@@ -55,9 +63,9 @@ def analyze_and_plot_results(file_path='performance_results.csv'):
     # 2. Calcolare le medie dei tempi e del throughput per ogni database e numero di record
     # Raggruppa i dati per 'database' e 'num_records' e calcola la media
     df_grouped = df.groupby(['database', 'num_records']).agg(
-        average_duration=('duration_seconds', 'mean'), # Modificato da 'avg_duration'
-        average_throughput=('throughput_records_per_second', 'mean') # Modificato da 'avg_throughput'
-    ).reset_index() # reset_index trasforma gli indici raggruppati in colonne regolari
+        average_duration=('duration_seconds', 'mean'), 
+        average_throughput=('throughput_records_per_second', 'mean') 
+    ).reset_index() 
 
     print("\nMedie calcolate:")
     print(df_grouped)
