@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import psycopg2
 from psycopg2 import extras # Aggiunto per execute_values
-from influxdb_client import InfluxDBClient, data_point, WriteOptions
+from influxdb_client import InfluxDBClient, Point, WriteOptions
 from influxdb_client.rest import ApiException as InfluxApiException
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
@@ -76,7 +76,7 @@ def send_batch_to_influxdb(data_batch, write_api, bucket, org):
     data_points = []
 
     for data in data_batch:
-        data_point = data_point("sensor_data") \
+        data_point = Point("sensor_data") \
             .tag("device", data["device"]) \
             .field("temperature", data["temperature"]) \
             .field("humidity", data["humidity"]) \
