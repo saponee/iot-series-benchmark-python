@@ -2,3 +2,4 @@
 average_duration_plot.png
 average_throughput_plot.png
 performance_results.csv
+__pycache__/
