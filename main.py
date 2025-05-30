@@ -10,7 +10,7 @@ from sensors import connect_to_influx, connect_to_timescale, send_batch_to_influ
 
 # Paramentri per il testing 
 
-BATCH_SIZE = 100
+BATCH_SIZE = 10
 DATA_VOLUMES = [1, 10, 100, 10000, 50000, 100000]
 REPEAT_PER_TEST = 3  # Numero di ripetizioni per ogni test
 
