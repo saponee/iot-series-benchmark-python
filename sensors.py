@@ -53,7 +53,7 @@ def connect_to_influx(input_batch_size):
 
         client.ping()
 
-        print("> Verificando lo stato di InfluxDB...")
+        print(" Verifico lo stato di InfluxDB...")
 
         print("✅ Connessione a InfluxDB riuscita e API di scrittura configurata per il batching.")
         

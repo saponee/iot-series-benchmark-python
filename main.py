@@ -6,11 +6,11 @@ from graphs import analyze_and_plot_results
 from datetime import datetime, timedelta, timezone
 from device import Device
 from sensors import connect_to_influx, connect_to_timescale, send_batch_to_influxdb, send_batch_to_timescaledb
-
+import sys
 
 # Paramentri per il testing 
 
-BATCH_SIZE = 10
+BATCH_SIZE = 10000
 DATA_VOLUMES = [1, 10, 100, 10000, 50000, 100000]
 REPEAT_PER_TEST = 3  # Numero di ripetizioni per ogni test
 
@@ -40,15 +40,15 @@ def save_performance_result(database_name, num_records, duration, throughput):
 
     df_results.to_csv('performance_results.csv', mode='a', header=not file_exists, index=False)
 
-    print(f"✔️ Risultati salvati in performance_results.csv per {database_name} ({num_records} record).")
+    print(f"✔️ Risultati salvati nel file performance_results.csv per {database_name} ({num_records} record).")
 
 def run_test(num_records_generated):
     """
     Esegue il test per il numero dei volume di dati richiesto,
     misurandone le prestazioni per il throughput e il tempo di esecuzione.
     """
-    print(f"\n--- Inizio test per {num_records_generated} record ---")
-    print(f"⏳ Preparando {num_records_generated} dati di sensori...")
+    print(f"\n------ Inizio test per {num_records_generated} record ------")
+    print(f" Preparando:  {num_records_generated} dati di sensori...")
 
     all_data = []
 
@@ -72,13 +72,13 @@ def run_test(num_records_generated):
     duration_ts = throughput_ts = None
 
 
-    print(f"🌍 Tentativo di connessione al client InfluxDB per -->: {os.getenv('INFLUX_URL')}...")
+    print(f" Tentativo di connessione al client InfluxDB per --> {os.getenv('INFLUX_URL')}...")
 
     influx_client, influx_write_api = connect_to_influx(BATCH_SIZE) # Recupero del client e della write_api
 
     if influx_client and influx_write_api:
 
-        print(f"\n🚀 Avvio inserimento dati in InfluxDB per {num_records_generated} record...")
+        print(f"\n Avvio inserimento dati in InfluxDB per {num_records_generated} record...")
 
         start_time_influx = time.perf_counter() # INIZIO COUNTER TEMPORALE 
 
@@ -105,7 +105,7 @@ def run_test(num_records_generated):
         print(f"✅ InfluxDB - Completato. Tempo: {duration_influx:.2f} s, Throughput: {throughput_influx:.2f} r/s")
 
     else:
-        print("❌ Connessione InfluxDB fallita, saltando il test.")
+        print("❌ Connessione InfluxDB fallita, test saltato.")
     
     # FINE INFLUX
 
@@ -115,7 +115,7 @@ def run_test(num_records_generated):
     if ts_conn:
         print("✅ Connessione a TimescaleDB riuscita.")
 
-        print(f"\n🚀 Avvio inserimento dati in TimescaleDB per {num_records_generated} record...")
+        print(f"\n Avvio inserimento dati in TimescaleDB per {num_records_generated} record...")
 
         # INIZIO DEL COUNTER
         start_time_ts = time.perf_counter()
@@ -140,7 +140,7 @@ def run_test(num_records_generated):
     else:
         print("❌ Connessione TimescaleDB fallita, saltando il test.")
 
-    print(f"--- Fine test per {num_records_generated} record ---")
+    print(f"------ Fine test per {num_records_generated} record ------")
 
     return duration_influx, throughput_influx, duration_ts, throughput_ts
 
