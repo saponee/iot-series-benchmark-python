@@ -106,7 +106,7 @@ def connect_to_timescale():
             port=DB_PORT,
             dbname=DB_NAME
         )
-
+        #RIMUOVERE----------------------------------------------------------
         # Creazione della hyperatable in caso non esistesse
         with conn.cursor() as cursor:
             cursor.execute("""

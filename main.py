@@ -32,9 +32,18 @@ def save_performance_result(database_name, num_records, duration, throughput):
         'duration_seconds': duration,
         'throughput_records_per_second': throughput
     }
+    
+    """ 
+    results_query ={
+        'database' : database_name,
+        'query' :  query_name
+        'duration' : time_duration
+    } 
+    """
 
 
     df_results = pd.DataFrame([results])
+    #df_results_query = pd.DataFrame([results_query])
 
     file_exists = os.path.isfile('performance_results.csv') #Verifica dell'esistenza del file
 
@@ -71,6 +80,7 @@ def run_test(num_records_generated):
     duration_influx = throughput_influx = None
     duration_ts = throughput_ts = None
 
+    #duration_query_ts = duration_query_influx = None
 
     print(f" Tentativo di connessione al client InfluxDB per --> {os.getenv('INFLUX_URL')}...")
 
@@ -100,9 +110,12 @@ def run_test(num_records_generated):
         influx_write_api.close()
         influx_client.close()
 
+
+        #duration_query_influx = (end_time_influx_query - start_time_influx_query)
         duration_influx = (end_time_influx - start_time_influx)
         throughput_influx = (num_records_generated / duration_influx) if duration_influx > 0 else 0
         print(f"✅ InfluxDB - Completato. Tempo: {duration_influx:.2f} s, Throughput: {throughput_influx:.2f} r/s")
+
 
     else:
         print("❌ Connessione InfluxDB fallita, test saltato.")
@@ -132,10 +145,23 @@ def run_test(num_records_generated):
 
         end_time_ts = time.perf_counter()
         # FINE DEL COUNTER
+        
+        #start_time_ts_query = time.perf_counter()
+        
+        #ESECUZIONE QUERY TIMESCALE
+        """ with ts_conn.cursor() as cursor:
+            cursor.execute(
+                
+            )
+            ts_conn.commit()
+ """
+        #duration_query_ts = (end_time_ts_query - start_time_ts_query)
 
         duration_ts = (end_time_ts - start_time_ts)
         throughput_ts = (num_records_generated / duration_ts) if duration_ts > 0 else 0
         print(f"✅ TimescaleDB - Completato. Tempo: {duration_ts:.2f} s, Throughput: {throughput_ts:.2f} r/s")
+
+
         ts_conn.close()
     else:
         print("❌ Connessione TimescaleDB fallita, saltando il test.")
