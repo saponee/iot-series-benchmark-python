@@ -106,19 +106,6 @@ def connect_to_timescale():
             port=DB_PORT,
             dbname=DB_NAME
         )
-        #RIMUOVERE----------------------------------------------------------
-        # Creazione della hyperatable in caso non esistesse
-        with conn.cursor() as cursor:
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS sensors (
-                    time TIMESTAMPTZ NOT NULL,
-                    device TEXT NOT NULL,
-                    temperature DOUBLE PRECISION,
-                    humidity DOUBLE PRECISION
-                );
-                SELECT create_hypertable('sensors', 'time', if_not_exists => TRUE);
-            """)
-            conn.commit()
         return conn
     
 

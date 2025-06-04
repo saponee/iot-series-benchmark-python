@@ -4,52 +4,16 @@ import pandas as pd
 import random
 from graphs import analyze_and_plot_results
 from datetime import datetime, timedelta, timezone
-from device import Device
+from device import Device, save_performance_result
 from sensors import connect_to_influx, connect_to_timescale, send_batch_to_influxdb, send_batch_to_timescaledb
 import sys
 
 # Paramentri per il testing 
 
-BATCH_SIZE = 10000
+BATCH_SIZE = 5000
 DATA_VOLUMES = [1, 10, 100, 10000, 50000, 100000]
 REPEAT_PER_TEST = 3  # Numero di ripetizioni per ogni test
 
-
-
-def save_performance_result(database_name, num_records, duration, throughput):
-    """
-    Genera un file csv con all'interno
-    i risultati del test appena concluso, in particolare:
-    - nome del database, 
-    - numero dei record totali che sono stati inseriti in quel test
-    - la durata in secondi dell'invio e in throughput.
-    
-    """
-
-    results = {
-        'database': database_name,
-        'num_records': num_records,
-        'duration_seconds': duration,
-        'throughput_records_per_second': throughput
-    }
-    
-    """ 
-    results_query ={
-        'database' : database_name,
-        'query' :  query_name
-        'duration' : time_duration
-    } 
-    """
-
-
-    df_results = pd.DataFrame([results])
-    #df_results_query = pd.DataFrame([results_query])
-
-    file_exists = os.path.isfile('performance_results.csv') #Verifica dell'esistenza del file
-
-    df_results.to_csv('performance_results.csv', mode='a', header=not file_exists, index=False)
-
-    print(f"✔️ Risultati salvati nel file performance_results.csv per {database_name} ({num_records} record).")
 
 def run_test(num_records_generated):
     """
@@ -79,8 +43,6 @@ def run_test(num_records_generated):
 
     duration_influx = throughput_influx = None
     duration_ts = throughput_ts = None
-
-    #duration_query_ts = duration_query_influx = None
 
     print(f" Tentativo di connessione al client InfluxDB per --> {os.getenv('INFLUX_URL')}...")
 
