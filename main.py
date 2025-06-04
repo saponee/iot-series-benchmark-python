@@ -2,7 +2,7 @@ import time
 import os
 import pandas as pd
 import random
-from graphs import analyze_and_plot_results
+from graphs_datapoints import analyze_and_plot_results
 from datetime import datetime, timedelta, timezone
 from device import Device, save_performance_result
 from sensors import connect_to_influx, connect_to_timescale, send_batch_to_influxdb, send_batch_to_timescaledb
