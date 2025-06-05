@@ -1,6 +1,9 @@
-from query_benchmark import run_query_influx,run_query_timescale
+from query_benchmark import run_query_influx, run_query_timescale
 import os
 from dotenv import load_dotenv
+from graphs_query import analyze_and_plot_results_query
+
+
 
 load_dotenv()
 
@@ -27,15 +30,7 @@ QUERIES_FLUX = {
           |> filter(fn: (r) => r["_field"] == "temperature")
           |> count()
     '''
-    ,
-    "count_distinct": f'''
-     from(bucket: "{bucket}")
-        |> range(start: -1h)
-        |> filter(fn: (r) => r["_measurement"] == "sensor_data")
-        |> group(columns: ["_time", "device"])  // Raggruppa per timestamp e device
-        |> distinct(column: "_time")            // Prendi i timestamp distinti
-        |> count()
-    '''
+
 }
 
 QUERIES_TS = {
@@ -66,3 +61,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    analyze_and_plot_results_query()
+
