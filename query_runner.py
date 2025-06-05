@@ -34,6 +34,22 @@ QUERIES_FLUX = {
 }
 
 QUERIES_TS = {
+    "mean-temperature":
+    '''
+    SELECT device,
+        AVG(temperature) AS mean_temperature
+    FROM sensor_data
+    WHERE time >= NOW() - INTERVAL '1 hour'
+    GROUP BY device;
+    ''',
+    "count_records" : 
+    '''
+    -- 2) conteggio delle righe (record) con temperatura nell'ultima ora
+    SELECT COUNT(*) AS count_records
+    FROM sensor_data
+    WHERE time >= NOW() - INTERVAL '1 hour'
+    AND temperature IS NOT NULL;
+    '''
 
 }
 
