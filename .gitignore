@@ -1,6 +1,8 @@
 .env
 average_duration_plot.png
 average_throughput_plot.png
+average_time_for_query.png
 performance_results.csv
-__pycache__/
 query_results.csv
+__pycache__/
+
