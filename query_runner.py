@@ -34,7 +34,7 @@ QUERIES_FLUX = {
 }
 
 QUERIES_TS = {
-    "mean-temperature":
+    "mean_temperature":
     '''
     SELECT device,
         AVG(temperature) AS mean_temperature
@@ -42,6 +42,7 @@ QUERIES_TS = {
     WHERE time >= NOW() - INTERVAL '1 hour'
     GROUP BY device;
     ''',
+
     "count_records" : 
     '''
     -- 2) conteggio delle righe (record) con temperatura nell'ultima ora
@@ -68,8 +69,10 @@ def main():
     
     for name_ts, ts_query in QUERIES_TS.items() :
         print(f"\n Avvio test di benchmark per la query sql --> '{name_ts}' (ripetuto {REPEAT_PER_QUERY} volte)")
+        for i in range(REPEAT_PER_QUERY):
+            print(f" Esecuzione {i+1} di {REPEAT_PER_QUERY} per la query '{name}'")
 
-        run_query_timescale(ts_query, name_ts)
+            run_query_timescale(ts_query, name_ts)
 
 
     print("\n✅ Tutti i benchmark delle query sono stati completati.")

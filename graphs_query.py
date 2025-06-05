@@ -21,7 +21,7 @@ def analyze_and_plot_results_query(file_path='query_results.csv'):
     
     if removed_plot_duration_file == True:
         print(f"🗑️ File '{plot_query_time_file}' rimosso correttamente" )
-    elif removed_plot_duration_file ==False:
+    elif removed_plot_duration_file == False:
         print(f"🗑️il File '{plot_query_time_file}' non è stato rimosso correttamente" )
     
     if not os.path.exists(file_path):
@@ -58,7 +58,7 @@ def analyze_and_plot_results_query(file_path='query_results.csv'):
     plt.figure(figsize=(12, 7)) 
     sns.barplot(x='query', y='average_duration', hue='database', data=df_grouped, palette='viridis')
     plt.title('Durata Media di Esecuzione query per database', fontsize=16)
-    plt.xlabel('nome_query', fontsize=12)
+    plt.xlabel('nome query', fontsize=12)
     plt.ylabel('Durata Media (secondi)', fontsize=12)
     plt.legend(title='Database')
     plt.xticks(rotation=45, ha='right')  
