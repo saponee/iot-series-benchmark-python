@@ -48,7 +48,7 @@ def analyze_and_plot_results_query(file_path='query_results.csv'):
     print("\nMedie durata query calcolate:")
     print(df_grouped)
 
-       #  Genera i grafici
+    #  Genera i grafici
 
     
     sns.set_theme(style="whitegrid")
