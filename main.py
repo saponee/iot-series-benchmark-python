@@ -10,8 +10,8 @@ import sys
 
 # Paramentri per il testing 
 
-BATCH_SIZE = 5000
-DATA_VOLUMES = [1, 10, 100, 10000, 50000, 100000]
+BATCH_SIZE = 10
+DATA_VOLUMES = [1, 10, 100,1000, 10000, 100000]
 REPEAT_PER_TEST = 3  # Numero di ripetizioni per ogni test
 
 
@@ -65,13 +65,13 @@ def run_test(num_records_generated):
         if current_batch_influx:
             send_batch_to_influxdb(current_batch_influx, influx_write_api, os.getenv("INFLUX_BUCKET"), os.getenv("INFLUX_ORG"))
 
-        end_time_influx = time.perf_counter()
+        
         # STOP COUNTER 
 
 
         influx_write_api.close()
         influx_client.close()
-
+        end_time_influx = time.perf_counter()
 
         #duration_query_influx = (end_time_influx_query - start_time_influx_query)
         duration_influx = (end_time_influx - start_time_influx)
@@ -104,27 +104,17 @@ def run_test(num_records_generated):
                 current_batch_ts.clear()
         if current_batch_ts:
             send_batch_to_timescaledb(current_batch_ts, ts_conn, BATCH_SIZE)
-
+        ts_conn.close()
         end_time_ts = time.perf_counter()
         # FINE DEL COUNTER
         
-        #start_time_ts_query = time.perf_counter()
-        
-        #ESECUZIONE QUERY TIMESCALE
-        """ with ts_conn.cursor() as cursor:
-            cursor.execute(
-                
-            )
-            ts_conn.commit()
- """
-        #duration_query_ts = (end_time_ts_query - start_time_ts_query)
 
         duration_ts = (end_time_ts - start_time_ts)
         throughput_ts = (num_records_generated / duration_ts) if duration_ts > 0 else 0
         print(f"✅ TimescaleDB - Completato. Tempo: {duration_ts:.2f} s, Throughput: {throughput_ts:.2f} r/s")
 
 
-        ts_conn.close()
+        
     else:
         print("❌ Connessione TimescaleDB fallita, saltando il test.")
 
