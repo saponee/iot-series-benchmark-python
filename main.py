@@ -10,8 +10,8 @@ import sys
 
 # Paramentri per il testing 
 
-BATCH_SIZE = 10
-DATA_VOLUMES = [1, 10, 100,1000, 10000, 100000]
+BATCH_SIZE = 5000
+DATA_VOLUMES = [5000,10000, 100000,1000000]
 REPEAT_PER_TEST = 3  # Numero di ripetizioni per ogni test
 
 
@@ -42,47 +42,54 @@ def run_test(num_records_generated):
     # INIZIO INFLUX
 
     duration_influx = throughput_influx = None
-    duration_ts = throughput_ts = None
+    duration_ts = throughput_ts = None # Non usato in questo estratto, ma mantenuto
 
     print(f" Tentativo di connessione al client InfluxDB per --> {os.getenv('INFLUX_URL')}...")
 
     influx_client, influx_write_api = connect_to_influx(BATCH_SIZE) # Recupero del client e della write_api
 
     if influx_client and influx_write_api:
+        try:
+            print(f"\n Avvio inserimento dati in InfluxDB per {num_records_generated} record...")
 
-        print(f"\n Avvio inserimento dati in InfluxDB per {num_records_generated} record...")
+            start_time_influx = time.perf_counter() # INIZIO COUNTER TEMPORALE
 
-        start_time_influx = time.perf_counter() # INIZIO COUNTER TEMPORALE 
+            current_batch_influx = []
 
-        current_batch_influx = []
+            # CREAZIONE DEI BATCH PER INFLUX
+            for data_record in all_data:
+                current_batch_influx.append(data_record)
+                if len(current_batch_influx) >= BATCH_SIZE:
+                    send_batch_to_influxdb(current_batch_influx, influx_write_api, os.getenv("INFLUX_BUCKET"), os.getenv("INFLUX_ORG"))
+                    current_batch_influx.clear()
 
-        #CREAZIONE DEI BATCH PER INFLUX 
-        for data_record in all_data:
-            current_batch_influx.append(data_record)
-            if len(current_batch_influx) >= BATCH_SIZE:
+            
+            if current_batch_influx:
                 send_batch_to_influxdb(current_batch_influx, influx_write_api, os.getenv("INFLUX_BUCKET"), os.getenv("INFLUX_ORG"))
-                current_batch_influx.clear()
-        if current_batch_influx:
-            send_batch_to_influxdb(current_batch_influx, influx_write_api, os.getenv("INFLUX_BUCKET"), os.getenv("INFLUX_ORG"))
 
-        
-        # STOP COUNTER 
+            end_time_influx = time.perf_counter() 
 
+            # Calcola le metriche
+            duration_influx = (end_time_influx - start_time_influx)
+            throughput_influx = (num_records_generated / duration_influx) if duration_influx > 0 else 0
+            print(f"✅ InfluxDB - Completato. Tempo: {duration_influx:.2f} s, Throughput: {throughput_influx:.2f} r/s")
 
-        influx_write_api.close()
-        influx_client.close()
-        end_time_influx = time.perf_counter()
-
-        #duration_query_influx = (end_time_influx_query - start_time_influx_query)
-        duration_influx = (end_time_influx - start_time_influx)
-        throughput_influx = (num_records_generated / duration_influx) if duration_influx > 0 else 0
-        print(f"✅ InfluxDB - Completato. Tempo: {duration_influx:.2f} s, Throughput: {throughput_influx:.2f} r/s")
-
+        except Exception as e:
+            # Cattura qualsiasi errore imprevisto durante l'inserimento
+            print(f"❌ Errore critico durante l'inserimento in InfluxDB: {e}")
+        finally:
+            # QUESTO BLOCCO GARANTISCE LA CHIUSURA
+            if influx_write_api: # Assicurati che l'oggetto esista prima di chiamare close
+                print("Chiamata a influx_write_api.close() per svuotare il buffer...")
+                influx_write_api.close()
+            if influx_client: # Assicurati che l'oggetto esista prima di chiamare close
+                print("Chiamata a influx_client.close() per chiudere la connessione...")
+                influx_client.close()
 
     else:
         print("❌ Connessione InfluxDB fallita, test saltato.")
-    
-    # FINE INFLUX
+#FINE INFLUX
+
 
     # INIZIO TS
     ts_conn = connect_to_timescale()

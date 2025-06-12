@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import psycopg2
 from psycopg2 import extras # Aggiunto per execute_values
 from influxdb_client import InfluxDBClient, Point, WriteOptions
+from influxdb_client.client.write_api import WriteType
 from influxdb_client.rest import ApiException as InfluxApiException
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
@@ -46,7 +47,11 @@ def connect_to_influx(input_batch_size):
             url=INFLUX_URL,
             token=INFLUX_TOKEN,
             org=INFLUX_ORG
-        ).write_api(write_options=WriteOptions(batch_size=input_batch_size, flush_interval=1000)) 
+        ).write_api(WriteOptions(
+    write_type=WriteType.batching,
+    batch_size=input_batch_size,
+    flush_interval=1000
+))
         
         # Test della connessione 
         client = InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
