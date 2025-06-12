@@ -11,7 +11,7 @@ import sys
 # Paramentri per il testing 
 
 BATCH_SIZE = 5000
-DATA_VOLUMES = [5000,10000, 100000,1000000]
+DATA_VOLUMES = [1000,10000,100000,1000000]
 REPEAT_PER_TEST = 3  # Numero di ripetizioni per ogni test
 
 
@@ -91,41 +91,50 @@ def run_test(num_records_generated):
 #FINE INFLUX
 
 
-    # INIZIO TS
+     # --- INIZIO TS ---
+    print(f"\nTentativo di connessione a TimescaleDB...")
     ts_conn = connect_to_timescale()
 
     if ts_conn:
-        print("✅ Connessione a TimescaleDB riuscita.")
+        try:
+            print("✅ Connessione a TimescaleDB riuscita.")
+            print(f"\n Avvio inserimento dati in TimescaleDB per {num_records_generated} record...")
 
-        print(f"\n Avvio inserimento dati in TimescaleDB per {num_records_generated} record...")
+            # INIZIO DEL COUNTER
+            start_time_ts = time.perf_counter()
 
-        # INIZIO DEL COUNTER
-        start_time_ts = time.perf_counter()
+            current_batch_ts = [] # CARICAMENTO DEL BATCH
 
-        current_batch_ts = [] # CARICAMENTO DEL BATCH
+            for data_record in all_data:
+                current_batch_ts.append(data_record)
+                if len(current_batch_ts) >= BATCH_SIZE:
+                    send_batch_to_timescaledb(current_batch_ts, ts_conn, BATCH_SIZE)
+                    current_batch_ts.clear()
 
-        for data_record in all_data:
-            current_batch_ts.append(data_record)
-            if len(current_batch_ts) >= BATCH_SIZE:
+            # Invia l'ultimo batch residuo
+            if current_batch_ts:
                 send_batch_to_timescaledb(current_batch_ts, ts_conn, BATCH_SIZE)
-                current_batch_ts.clear()
-        if current_batch_ts:
-            send_batch_to_timescaledb(current_batch_ts, ts_conn, BATCH_SIZE)
-        ts_conn.close()
-        end_time_ts = time.perf_counter()
-        # FINE DEL COUNTER
-        
 
-        duration_ts = (end_time_ts - start_time_ts)
-        throughput_ts = (num_records_generated / duration_ts) if duration_ts > 0 else 0
-        print(f"✅ TimescaleDB - Completato. Tempo: {duration_ts:.2f} s, Throughput: {throughput_ts:.2f} r/s")
+            # --- FINE DEL COUNTER (SPOSTATO QUI) ---
+            end_time_ts = time.perf_counter()
 
+            # Calcola le metriche
+            duration_ts = (end_time_ts - start_time_ts)
+            throughput_ts = (num_records_generated / duration_ts) if duration_ts > 0 else 0
+            print(f"✅ TimescaleDB - Completato. Tempo: {duration_ts:.2f} s, Throughput: {throughput_ts:.2f} r/s")
 
-        
+        except Exception as e:
+            # Cattura qualsiasi errore imprevisto durante l'inserimento in TimescaleDB
+            print(f"❌ Errore critico durante l'inserimento in TimescaleDB: {e}")
+        finally:
+            # QUESTO BLOCCO GARANTISCE LA CHIUSURA
+            if ts_conn:
+                print("Chiamata a ts_conn.close() per chiudere la connessione TimescaleDB...")
+                ts_conn.close()
     else:
         print("❌ Connessione TimescaleDB fallita, saltando il test.")
 
-    print(f"------ Fine test per {num_records_generated} record ------")
+    print(f"\n------ Fine test per {num_records_generated} record ------")
 
     return duration_influx, throughput_influx, duration_ts, throughput_ts
 
