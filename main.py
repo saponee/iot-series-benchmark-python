@@ -25,7 +25,7 @@ def run_test(num_records_generated):
 
     all_data = []
 
-    devices = [Device() for _ in range(10)] # Nel test i device sono 10 e vengono prima inseriti in questa lista
+    devices = [Device() for _ in range(10)] 
 
     current_timestamp = datetime.now(timezone.utc)
 
@@ -35,18 +35,18 @@ def run_test(num_records_generated):
 
         all_data.append(device.generate_data(timestamp=current_timestamp))
 
-        current_timestamp += timedelta(milliseconds=1)  # Leggero ritardo per ciascun data point prodotto
+        current_timestamp += timedelta(milliseconds=1)  
 
     print(f"✔️ {len(all_data)} dati generati in memoria.")
 
     # INIZIO INFLUX
 
     duration_influx = throughput_influx = None
-    duration_ts = throughput_ts = None # Non usato in questo estratto, ma mantenuto
+    duration_ts = throughput_ts = None 
 
     print(f" Tentativo di connessione al client InfluxDB per --> {os.getenv('INFLUX_URL')}...")
 
-    influx_client, influx_write_api = connect_to_influx(BATCH_SIZE) # Recupero del client e della write_api
+    influx_client, influx_write_api = connect_to_influx(BATCH_SIZE) 
 
     if influx_client and influx_write_api:
         try:
@@ -76,18 +76,18 @@ def run_test(num_records_generated):
 
         except Exception as e:
             # Cattura qualsiasi errore imprevisto durante l'inserimento
-            print(f"❌ Errore critico durante l'inserimento in InfluxDB: {e}")
+            print(f"Errore critico durante l'inserimento in InfluxDB: {e}")
         finally:
             # QUESTO BLOCCO GARANTISCE LA CHIUSURA
             if influx_write_api: # Assicurati che l'oggetto esista prima di chiamare close
-                print("Chiamata a influx_write_api.close() per svuotare il buffer...")
+                print("Chiusura di influx_write_api e svuotamento del buffer.")
                 influx_write_api.close()
             if influx_client: # Assicurati che l'oggetto esista prima di chiamare close
-                print("Chiamata a influx_client.close() per chiudere la connessione...")
+                print("Chiusura della connessione influx_client.")
                 influx_client.close()
 
     else:
-        print("❌ Connessione InfluxDB fallita, test saltato.")
+        print("Connessione InfluxDB fallita, test saltato.")
 #FINE INFLUX
 
 
@@ -97,7 +97,7 @@ def run_test(num_records_generated):
 
     if ts_conn:
         try:
-            print("✅ Connessione a TimescaleDB riuscita.")
+            print("Connessione a TimescaleDB riuscita.")
             print(f"\n Avvio inserimento dati in TimescaleDB per {num_records_generated} record...")
 
             # INIZIO DEL COUNTER
@@ -125,14 +125,14 @@ def run_test(num_records_generated):
 
         except Exception as e:
             # Cattura qualsiasi errore imprevisto durante l'inserimento in TimescaleDB
-            print(f"❌ Errore critico durante l'inserimento in TimescaleDB: {e}")
+            print(f" Errore critico durante l'inserimento in TimescaleDB: {e}")
         finally:
             # QUESTO BLOCCO GARANTISCE LA CHIUSURA
             if ts_conn:
-                print("Chiamata a ts_conn.close() per chiudere la connessione TimescaleDB...")
+                print("Chiusura della connessione TimescaleDB.")
                 ts_conn.close()
     else:
-        print("❌ Connessione TimescaleDB fallita, saltando il test.")
+        print("Connessione TimescaleDB fallita, saltando il test.")
 
     print(f"\n------ Fine test per {num_records_generated} record ------")
 
@@ -149,13 +149,13 @@ def main():
     
     if os.path.exists('performance_results.csv'):
         os.remove('performance_results.csv')
-        print("🗑️ File 'performance_results.csv' precedente rimosso.")
+        print(" File 'performance_results.csv' precedente rimosso.")
 
     for volume in DATA_VOLUMES:
-        print(f"\n📊 Inizio test per {volume} record (ripetuto {REPEAT_PER_TEST} volte)...")
+        print(f"\n Inizio test per {volume} record (ripetuto {REPEAT_PER_TEST} volte)...")
 
         for run in range(REPEAT_PER_TEST):
-            print(f"\n🔁 Esecuzione {run+1} di {REPEAT_PER_TEST} per {volume} record")
+            print(f"\n Esecuzione {run+1} di {REPEAT_PER_TEST} per {volume} record")
             dur_i, thr_i, dur_t, thr_t = run_test(volume)
 
             if dur_i and thr_i:
