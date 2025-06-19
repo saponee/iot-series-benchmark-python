@@ -23,11 +23,10 @@ QUERIES_FLUX = {
           |> group(columns: ["device"])
           |> mean()
     ''',
-    "count_records": f'''
+    "count_all_records_for_each_device": f'''
         from(bucket: "{bucket}")
           |> range(start: -1h)
           |> filter(fn: (r) => r["_measurement"] == "sensor_data")
-          |> filter(fn: (r) => r["_field"] == "temperature")
           |> count()
     '''
 
@@ -43,13 +42,14 @@ QUERIES_TS = {
     GROUP BY device;
     ''',
 
-    "count_records" : 
+    "count_all_records_for_each_device": 
     '''
     -- 2) conteggio delle righe (record) con temperatura nell'ultima ora
-    SELECT COUNT(*) AS count_records
+    SELECT device, COUNT(*)
     FROM sensors
     WHERE time >= NOW() - INTERVAL '1 hour'
-    AND temperature IS NOT NULL;
+    GROUP BY device;
+        
     '''
 
 }

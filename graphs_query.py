@@ -20,12 +20,12 @@ def analyze_and_plot_results_query(file_path='query_results.csv'):
             removed_plot_duration_file = False
     
     if removed_plot_duration_file == True:
-        print(f"🗑️ File '{plot_query_time_file}' rimosso correttamente" )
+        print(f" File '{plot_query_time_file}' rimosso correttamente" )
     elif removed_plot_duration_file == False:
-        print(f"🗑️il File '{plot_query_time_file}' non è stato rimosso correttamente" )
+        print(f"il File '{plot_query_time_file}' non è stato rimosso correttamente" )
     
     if not os.path.exists(file_path):
-        print(f"❌ Errore: Il file '{file_path}' non è stato trovato. Assicurati di aver eseguito prima i test.")
+        print(f" Errore: Il file '{file_path}' non è stato trovato. Assicurati di aver eseguito prima i test.")
         return
     
     
@@ -64,7 +64,7 @@ def analyze_and_plot_results_query(file_path='query_results.csv'):
     plt.xticks(rotation=45, ha='right')  
     plt.tight_layout() 
     plt.savefig(plot_query_time_file) 
-    print(f"📈 Grafico '{plot_query_time_file}' generato.")
+    print(f" Grafico '{plot_query_time_file}' generato.")
 
 
     print("\n✅ Analisi e generazione grafici completate.")
