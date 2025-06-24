@@ -5,6 +5,8 @@ from device import save_query_result
 from typing import Optional
 from dotenv import load_dotenv
 import psycopg2 
+
+
 load_dotenv()
 
 
@@ -17,14 +19,14 @@ def run_query_influx(flux_query: str, query_name_influx: str) -> Optional[list]:
         - query_name_influx: nome descrittivo della query da salvare nei risultati
 
     Ritorna:
-        - Lista dei risultati della query (può essere vuota o None in caso di errore)
+        - Lista dei risultati della query 
     """
     influx_url = os.getenv("INFLUX_URL")
     influx_token = os.getenv("INFLUX_TOKEN")
     influx_org = os.getenv("INFLUX_ORG")
 
     if not all([influx_url, influx_token, influx_org]):
-        print("❌ Variabili d'ambiente mancanti: verifica INFLUX_URL, INFLUX_TOKEN, INFLUX_ORG")
+        print("Variabili d'ambiente mancanti: verifica INFLUX_URL, INFLUX_TOKEN, INFLUX_ORG")
         return None
 
     print(f" Connessione a InfluxDB ({influx_url}) in corso...")
@@ -34,11 +36,11 @@ def run_query_influx(flux_query: str, query_name_influx: str) -> Optional[list]:
             url=influx_url,
             token=influx_token,
             org=influx_org,
-            timeout=60_000 
+            timeout=3000_000 
         )
         query_api = influx_client.query_api()
     except Exception as e:
-        print(f"❌ Connessione a InfluxDB fallita: {e}")
+        print(f"Connessione a InfluxDB fallita: {e}")
         return None
 
     print(f" Esecuzione query '{query_name_influx}'...")
@@ -55,13 +57,11 @@ def run_query_influx(flux_query: str, query_name_influx: str) -> Optional[list]:
         print(f"✅ Query '{query_name_influx}' completata in {duration_query_influx:.4f}s")
         save_query_result("InfluxDB", query_name_influx, duration_query_influx)
 
-        if result:
-            print(f"🔍 Risultati trovati: {len(result)}")
-        else:
-            print("⚠️ Nessun risultato restituito dalla query.")
+        if not result:
+            print("Nessun risultato restituito dalla query.")
 
     except Exception as e:
-        print(f"❌ Errore durante la query '{query_name_influx}': {e}")
+        print(f"Errore durante la query '{query_name_influx}': {e}")
     finally:
         influx_client.close()
 
@@ -85,10 +85,10 @@ def run_query_timescale(timescale_query: str, query_name_ts: str):
             dbname=ts_dbname
         )
     except psycopg2.Error as e:
-        print(f"❌ Errore TimescaleDB (psycopg2) durante la connessione: {e}")
+        print(f"Errore TimescaleDB (psycopg2) durante la connessione: {e}")
         return None
     except Exception as e:
-        print(f"❌ Errore generico TimescaleDB durante la connessione: {e}")
+        print(f"Errore generico TimescaleDB durante la connessione: {e}")
         return None
 
     result = None
@@ -108,13 +108,13 @@ def run_query_timescale(timescale_query: str, query_name_ts: str):
             print(f"✅ Query '{query_name_ts}' completata in {duration_query_ts:.4f} secondi")
             save_query_result('Timescaldb', query_name_ts, duration_query_ts)
     except psycopg2.Error as e:
-        print(f"❌ Errore TimescaleDB (psycopg2) durante la query: {e}")
+        print(f"Errore TimescaleDB (psycopg2) durante la query: {e}")
     finally:
         conn.close()
 
     return result, duration_query_ts
 
 
-            
+
 
 

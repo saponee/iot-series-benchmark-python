@@ -17,7 +17,7 @@ bucket = os.getenv("INFLUX_BUCKET")
 QUERIES_FLUX = {
     "mean_temperature": f'''
         from(bucket: "{bucket}")
-          |> range(start: -1h)
+          |> range(start: -30d)
           |> filter(fn: (r) => r["_measurement"] == "sensor_data")
           |> filter(fn: (r) => r["_field"] == "temperature")
           |> group(columns: ["device"])
@@ -25,11 +25,43 @@ QUERIES_FLUX = {
     ''',
     "count_all_records_for_each_device": f'''
         from(bucket: "{bucket}")
-          |> range(start: -1h)
+          |> range(start: -30d)
           |> filter(fn: (r) => r["_measurement"] == "sensor_data")
           |> count()
-    '''
+    ''',
+    "days_of_max_temperature":
+    f'''
+timeRange = -30d
+maxTemp = from(bucket: "{bucket}")
+  |> range(start: timeRange)
+  |> filter(fn: (r) =>
+    r._measurement == "sensor_data" and
+    r._field == "temperature"
+  )
+  |> group(columns: ["device"])
+  |> max(column: "_value")
+  |> rename(columns:{{_value: "max_temp"}})
 
+data = from(bucket: "{bucket}")
+  |> range(start: timeRange)
+  |> filter(fn: (r) =>
+    r._measurement == "sensor_data" and
+    r._field == "temperature"
+  )
+
+table_joined = join(
+  tables: {{data: data, max: maxTemp}},
+  on: ["device"]
+)
+result = table_joined
+  |> filter(fn: (r) => r._value == r.max_temp)
+  |> keep(columns: ["device", "_time", "_value"])
+  |> rename(columns: {{_value: "temperature"}})
+
+result
+  |> yield(name: "max_temperature_date")
+
+'''
 }
 
 QUERIES_TS = {
@@ -38,26 +70,42 @@ QUERIES_TS = {
     SELECT device,
         AVG(temperature) AS mean_temperature
     FROM sensors
-    WHERE time >= NOW() - INTERVAL '1 hour'
+    WHERE time >= NOW() - INTERVAL '30 days'
     GROUP BY device;
     ''',
 
     "count_all_records_for_each_device": 
     '''
-    -- 2) conteggio delle righe (record) con temperatura nell'ultima ora
     SELECT device, COUNT(*)
     FROM sensors
-    WHERE time >= NOW() - INTERVAL '1 hour'
     GROUP BY device;
-        
     '''
+    ,
+    "days_of_max_temperature":
+    '''
+    WITH max_values AS (
+  SELECT 
+    device,
+    MAX(temperature) AS max_temp
+  FROM sensors
+  WHERE time >= NOW() - INTERVAL '30 days'
+  GROUP BY device
+)
 
+SELECT s.device, s.time, s.temperature
+FROM sensors s
+JOIN max_values mv
+  ON s.device = mv.device
+WHERE 
+  s.time >= NOW() - INTERVAL '30 days' AND
+  s.temperature = mv.max_temp;
+    '''
 }
 
 def main():
     if os.path.exists("query_results.csv"):
         os.remove("query_results.csv")
-        print("🗑️ File 'query_results.csv' precedente rimosso.")
+        print(" File 'query_results.csv' precedente rimosso.")
 
     for name, flux_query in QUERIES_FLUX.items():
         print(f"\n Avvio test di benchmark per la query --> '{name}' (ripetuto {REPEAT_PER_QUERY} volte)")

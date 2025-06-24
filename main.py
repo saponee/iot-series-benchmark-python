@@ -6,13 +6,13 @@ from graphs_datapoints import analyze_and_plot_results
 from datetime import datetime, timedelta, timezone
 from device import Device, save_performance_result
 from sensors import connect_to_influx, connect_to_timescale, send_batch_to_influxdb, send_batch_to_timescaledb
-import sys
+
 
 # Paramentri per il testing 
 
-BATCH_SIZE = 5000
-DATA_VOLUMES = [1000,10000,100000,1000000]
-REPEAT_PER_TEST = 3  # Numero di ripetizioni per ogni test
+BATCH_SIZE = 1000
+DATA_VOLUMES = [1000]
+REPEAT_PER_TEST = 1  # Numero di ripetizioni per ogni test
 
 
 def run_test(num_records_generated):
@@ -115,7 +115,7 @@ def run_test(num_records_generated):
             if current_batch_ts:
                 send_batch_to_timescaledb(current_batch_ts, ts_conn, BATCH_SIZE)
 
-            # --- FINE DEL COUNTER (SPOSTATO QUI) ---
+            
             end_time_ts = time.perf_counter()
 
             # Calcola le metriche
