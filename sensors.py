@@ -160,13 +160,15 @@ def send_batch_to_timescaledb(data_batch, conn, input_batch_size):
     except psycopg2.Error as e:
         print(f"Errore TimescaleDB (psycopg2) durante l'invio batch dati: {e}")
         try:
-            conn.rollback() # Esegue il rollback in caso di errore
+            conn.rollback() 
+            
         except psycopg2.Error as rb_error:
             print(f"Errore durante il rollback della transazione TimescaleDB: {rb_error}")
     except Exception as e:
         print(f"Errore generico TimescaleDB durante l'invio batch dati: {e}")
         if conn and not conn.closed:
             try:
-                conn.rollback() # Esegue il rollback 
+                conn.rollback() 
+            
             except psycopg2.Error as rb_error:
                 print(f"Errore durante il rollback della transazione TimescaleDB: {rb_error}")

@@ -25,7 +25,10 @@ def run_test(num_records_generated):
 
     all_data = []
 
-    devices = [Device() for _ in range(10)] 
+    devices = []
+    for _ in range(10):
+        device = Device()
+        devices.append(device)
 
     current_timestamp = datetime.now(timezone.utc)
 
@@ -79,10 +82,10 @@ def run_test(num_records_generated):
             print(f"Errore critico durante l'inserimento in InfluxDB: {e}")
         finally:
             # QUESTO BLOCCO GARANTISCE LA CHIUSURA
-            if influx_write_api: # Assicurati che l'oggetto esista prima di chiamare close
+            if influx_write_api: 
                 print("Chiusura di influx_write_api e svuotamento del buffer.")
                 influx_write_api.close()
-            if influx_client: # Assicurati che l'oggetto esista prima di chiamare close
+            if influx_client: 
                 print("Chiusura della connessione influx_client.")
                 influx_client.close()
 
@@ -132,7 +135,7 @@ def run_test(num_records_generated):
                 print("Chiusura della connessione TimescaleDB.")
                 ts_conn.close()
     else:
-        print("Connessione TimescaleDB fallita, saltando il test.")
+        print("Connessione TimescaleDB fallita, test salatato.")
 
     print(f"\n------ Fine test per {num_records_generated} record ------")
 

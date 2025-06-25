@@ -26,7 +26,7 @@ def run_query_influx(flux_query: str, query_name_influx: str) -> Optional[list]:
     influx_org = os.getenv("INFLUX_ORG")
 
     if not all([influx_url, influx_token, influx_org]):
-        print("Variabili d'ambiente mancanti: verifica INFLUX_URL, INFLUX_TOKEN, INFLUX_ORG")
+        print("Variabili d'ambiente mancanti! --> verifica INFLUX_URL, INFLUX_TOKEN, INFLUX_ORG")
         return None
 
     print(f" Connessione a InfluxDB ({influx_url}) in corso...")
@@ -70,6 +70,16 @@ def run_query_influx(flux_query: str, query_name_influx: str) -> Optional[list]:
 
 
 def run_query_timescale(timescale_query: str, query_name_ts: str):
+    """
+    Esegue una query su TimescaleDB, misura la durata e salva il risultato.
+
+    Parametri:
+        - timescale_query: stringa SQL della query da eseguire
+        - query_name_ts: nome descrittivo della query da salvare nei risultati
+
+    Ritorna:
+        - Tuple contenente la lista dei risultati della query (o None) e la durata della query in secondi
+    """
     ts_host = os.getenv("DB_HOST")
     ts_port = os.getenv("DB_PORT")
     ts_dbname = os.getenv("DB_NAME")
@@ -108,7 +118,7 @@ def run_query_timescale(timescale_query: str, query_name_ts: str):
             print(f"✅ Query '{query_name_ts}' completata in {duration_query_ts:.4f} secondi")
             save_query_result('Timescaldb', query_name_ts, duration_query_ts)
     except psycopg2.Error as e:
-        print(f"Errore TimescaleDB (psycopg2) durante la query: {e}")
+        print(f"Errore TimescaleDB durante la query: {e}")
     finally:
         conn.close()
 
