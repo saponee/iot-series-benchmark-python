@@ -54,7 +54,7 @@ def run_query_influx(flux_query: str, query_name_influx: str) -> Optional[list]:
         end_time = time.perf_counter()
         duration_query_influx = end_time - start_time
 
-        print(f"✅ Query '{query_name_influx}' completata in {duration_query_influx:.4f}s")
+        print(f"Query '{query_name_influx}' completata in {duration_query_influx:.4f}s")
         save_query_result("InfluxDB", query_name_influx, duration_query_influx)
 
         if not result:
@@ -115,7 +115,7 @@ def run_query_timescale(timescale_query: str, query_name_ts: str):
 
             duration_query_ts = time.perf_counter() - start_time
             conn.commit()
-            print(f"✅ Query '{query_name_ts}' completata in {duration_query_ts:.4f} secondi")
+            print(f" Query '{query_name_ts}' completata in {duration_query_ts:.4f} secondi")
             save_query_result('Timescaldb', query_name_ts, duration_query_ts)
     except psycopg2.Error as e:
         print(f"Errore TimescaleDB durante la query: {e}")

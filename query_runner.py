@@ -123,7 +123,7 @@ def main():
             run_query_timescale(ts_query, name_ts)
 
 
-    print("\n✅ Tutti i benchmark delle query sono stati completati con successo.")
+    print("\nTutti i benchmark riguardanti le query sono stati completati.")
 
 
 if __name__ == "__main__":

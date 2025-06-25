@@ -10,9 +10,6 @@ def analyze_and_plot_results(file_path='performance_results.csv'):
 
     """
 
-
-
-    # Nomi dei file dei grafici come verranno salvati
     plot_duration_file = 'average_duration_plot.png'
     plot_throughput_file = 'average_throughput_plot.png'
 
@@ -26,7 +23,7 @@ def analyze_and_plot_results(file_path='performance_results.csv'):
             os.remove(plot_duration_file)
             removed_plot_duration_file = True
         except OSError as e: 
-            print(f"⚠️ Attenzione: Impossibile rimuovere '{plot_duration_file}': {e}")
+            print(f" Attenzione: Impossibile rimuovere '{plot_duration_file}': {e}")
             removed_plot_duration_file = False 
 
    
@@ -35,18 +32,18 @@ def analyze_and_plot_results(file_path='performance_results.csv'):
             os.remove(plot_throughput_file)
             removed_plot_throughput_file = True
         except OSError as e:
-            print(f"⚠️ Attenzione: Impossibile rimuovere '{plot_throughput_file}': {e}")
+            print(f"Attenzione: Impossibile rimuovere '{plot_throughput_file}': {e}")
             removed_plot_throughput_file = False 
 
    
     if removed_plot_duration_file and removed_plot_throughput_file:
-        print(f"🗑️ Files '{plot_duration_file}' e '{plot_throughput_file}' precedenti rimossi.")
+        print(f" Files '{plot_duration_file}' e '{plot_throughput_file}' precedenti rimossi.")
     elif removed_plot_duration_file or removed_plot_throughput_file:
-        print("🗑️ Solo uno dei file dei grafici precedenti è stato rimosso. Controlla i messaggi di attenzione per dettagli.")
+        print("Solo uno dei file dei grafici precedenti è stato rimosso. Controlla i messaggi di attenzione per dettagli.")
 
 
     if not os.path.exists(file_path):
-        print(f"❌ Errore: Il file '{file_path}' non è stato trovato. Assicurati di aver eseguito prima i test.")
+        print(f" Errore: Il file '{file_path}' non è stato trovato. Assicurati di aver eseguito prima i test.")
         return
 
     print(f" Analizzando i risultati dal file: {file_path}...")
@@ -57,7 +54,7 @@ def analyze_and_plot_results(file_path='performance_results.csv'):
         print("Dati letti con successo:")
         print(df.head())
     except Exception as e:
-        print(f"❌ Errore durante la lettura del file CSV: {e}")
+        print(f"Errore durante la lettura del file CSV: {e}")
         return
 
     # Raggruppa i dati per database e numero di record,
@@ -87,7 +84,7 @@ def analyze_and_plot_results(file_path='performance_results.csv'):
     plt.xticks(rotation=45, ha='right')  
     plt.tight_layout() 
     plt.savefig(plot_duration_file) 
-    print(f"📈 Grafico '{plot_duration_file}' generato.")
+    print(f" Grafico '{plot_duration_file}' generato.")
     
 
     # Grafico 2: Throughput medio (Record al Secondo)
@@ -100,10 +97,10 @@ def analyze_and_plot_results(file_path='performance_results.csv'):
     plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
     plt.savefig(plot_throughput_file)
-    print(f"📈 Grafico '{plot_throughput_file}' generato.")
+    print(f" Grafico '{plot_throughput_file}' generato.")
     # plt.show()
 
-    print("\n✅ Analisi e generazione grafici completate.")
+    print("\n Analisi e generazione grafici completate.")
 
 if __name__ == "__main__":
     analyze_and_plot_results()

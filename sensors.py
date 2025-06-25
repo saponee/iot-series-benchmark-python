@@ -58,19 +58,17 @@ def connect_to_influx(input_batch_size):
 
         client.ping()
 
-        print(" Verifico lo stato di InfluxDB...")
-
-        print("Connessione a InfluxDB riuscita e API di scrittura configurata per il batching.")
+        print("Connessione a InfluxDB riuscita.")
         
         return client, write_api
     
 
     except InfluxApiException as e:
-        print(f"Errore API InfluxDB durante la connessione: {e}")
+        print(f"Errore InfluxDB durante la connessione: {e}")
     except RequestsConnectionError as e:
-        print(f"Errore di connessione a InfluxDB: {e}. Assicurati che il server sia in esecuzione e accessibile all'URL {INFLUX_URL}.")
+        print(f"Errore di connessione a InfluxDB: {e}.")
     except Exception as e:
-        print(f" Errore generico durante la connessione a InfluxDB: {e}")
+        print(f" Errore durante la connessione a InfluxDB: {e}")
     return None, None
 
 def send_batch_to_influxdb(data_batch, write_api, bucket, org):
@@ -93,9 +91,9 @@ def send_batch_to_influxdb(data_batch, write_api, bucket, org):
         write_api.write(bucket=bucket, org=org, record=data_points)
 
     except InfluxApiException as e:
-        print(f"Errore InfluxDB (API) durante l'invio batch dati: {e}")
+        print(f"Errore InfluxDB  durante l'invio batch dati: {e}")
     except Exception as e:
-        print(f"Errore generico InfluxDB durante l'invio batch dati: {e}")
+        print(f"Errore InfluxDB durante l'invio batch dati: {e}")
 
 
 def connect_to_timescale():
@@ -134,7 +132,7 @@ def send_batch_to_timescaledb(data_batch, conn, input_batch_size):
     if not data_batch:
         return 
 
-    # Prepara i dati per l'INSERT
+    
     values = [  (  d["timestamp"], d["device"], d["temperature"], d["humidity"]  ) for d in data_batch]
 
     try:
@@ -158,17 +156,17 @@ def send_batch_to_timescaledb(data_batch, conn, input_batch_size):
 
         
     except psycopg2.Error as e:
-        print(f"Errore TimescaleDB (psycopg2) durante l'invio batch dati: {e}")
+        print(f"Errore TimescaleDB durante l'invio batch dati: {e}")
         try:
             conn.rollback() 
             
-        except psycopg2.Error as rb_error:
-            print(f"Errore durante il rollback della transazione TimescaleDB: {rb_error}")
+        except psycopg2.Error as rollb_error:
+            print(f"Errore durante il rollback in TimescaleDB: {rollb_error}")
     except Exception as e:
-        print(f"Errore generico TimescaleDB durante l'invio batch dati: {e}")
+        print(f"Errore TimescaleDB durante l'invio batch dati: {e}")
         if conn and not conn.closed:
             try:
                 conn.rollback() 
             
             except psycopg2.Error as rb_error:
-                print(f"Errore durante il rollback della transazione TimescaleDB: {rb_error}")
+                print(f"Errore durante il rollback TimescaleDB: {rb_error}")

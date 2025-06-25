@@ -40,7 +40,7 @@ def run_test(num_records_generated):
 
         current_timestamp += timedelta(milliseconds=1)  
 
-    print(f"✔️ {len(all_data)} dati generati in memoria.")
+    print(f" {len(all_data)} dati generati in memoria.")
 
     # INIZIO INFLUX
 
@@ -75,13 +75,13 @@ def run_test(num_records_generated):
             # Calcola le metriche
             duration_influx = (end_time_influx - start_time_influx)
             throughput_influx = (num_records_generated / duration_influx) if duration_influx > 0 else 0
-            print(f"✅ InfluxDB - Completato. Tempo: {duration_influx:.2f} s, Throughput: {throughput_influx:.2f} r/s")
+            print(f" InfluxDB - Completato. Tempo: {duration_influx:.2f} s, Throughput: {throughput_influx:.2f} r/s")
 
         except Exception as e:
-            # Cattura qualsiasi errore imprevisto durante l'inserimento
+            
             print(f"Errore critico durante l'inserimento in InfluxDB: {e}")
         finally:
-            # QUESTO BLOCCO GARANTISCE LA CHIUSURA
+            
             if influx_write_api: 
                 print("Chiusura di influx_write_api e svuotamento del buffer.")
                 influx_write_api.close()
@@ -121,10 +121,10 @@ def run_test(num_records_generated):
             
             end_time_ts = time.perf_counter()
 
-            # Calcola le metriche
+            
             duration_ts = (end_time_ts - start_time_ts)
             throughput_ts = (num_records_generated / duration_ts) if duration_ts > 0 else 0
-            print(f"✅ TimescaleDB - Completato. Tempo: {duration_ts:.2f} s, Throughput: {throughput_ts:.2f} r/s")
+            print(f" TimescaleDB - Completato. Tempo: {duration_ts:.2f} s, Throughput: {throughput_ts:.2f} r/s")
 
         except Exception as e:
             # Cattura qualsiasi errore imprevisto durante l'inserimento in TimescaleDB
@@ -167,7 +167,7 @@ def main():
             if dur_t and thr_t:
                 save_performance_result('TimescaleDB', volume, dur_t, thr_t)
 
-    print("\n✅ Tutte le simulazioni di inserimento completate.")
+    print("\n Tutte le simulazioni di inserimento completate.")
 
 
 if __name__ == "__main__":
