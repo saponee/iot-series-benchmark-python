@@ -21,7 +21,7 @@ def run_test(num_records_generated):
     misurandone le prestazioni per il throughput e il tempo di esecuzione.
     """
     print(f"\n------ Inizio test per {num_records_generated} record ------")
-    print(f" Preparando:  {num_records_generated} dati di sensori...")
+    print(f" Generando :  {num_records_generated} dati di sensori...")
 
     all_data = []
 
@@ -40,7 +40,7 @@ def run_test(num_records_generated):
 
         current_timestamp += timedelta(milliseconds=1)  
 
-    print(f" {len(all_data)} dati generati in memoria.")
+    print(f" {len(all_data)} dati generati.")
 
     # INIZIO INFLUX
 
@@ -55,7 +55,7 @@ def run_test(num_records_generated):
         try:
             print(f"\n Avvio inserimento dati in InfluxDB per {num_records_generated} record...")
 
-            start_time_influx = time.perf_counter() # INIZIO COUNTER TEMPORALE
+            start_time_influx = time.perf_counter() # INIZIO DEL COUNTER TEMPORALE
 
             current_batch_influx = []
 
@@ -75,22 +75,22 @@ def run_test(num_records_generated):
             # Calcola le metriche
             duration_influx = (end_time_influx - start_time_influx)
             throughput_influx = (num_records_generated / duration_influx) if duration_influx > 0 else 0
-            print(f" InfluxDB - Completato. Tempo: {duration_influx:.2f} s, Throughput: {throughput_influx:.2f} r/s")
+            print(f" InfluxDB --> Completato. Tempo: {duration_influx:.2f} s, Throughput: {throughput_influx:.2f} r/s")
 
         except Exception as e:
             
-            print(f"Errore critico durante l'inserimento in InfluxDB: {e}")
+            print(f"Errore durante l'inserimento in InfluxDB: {e}")
         finally:
             
             if influx_write_api: 
-                print("Chiusura di influx_write_api e svuotamento del buffer.")
+                print("Chiusura di influx_write_api e svuotamento del buffer")
                 influx_write_api.close()
             if influx_client: 
-                print("Chiusura della connessione influx_client.")
+                print("Chiusura della connessione influx_client")
                 influx_client.close()
 
     else:
-        print("Connessione InfluxDB fallita, test saltato.")
+        print("Connessione InfluxDB fallita, test saltato")
 #FINE INFLUX
 
 
@@ -101,7 +101,7 @@ def run_test(num_records_generated):
     if ts_conn:
         try:
             print("Connessione a TimescaleDB riuscita.")
-            print(f"\n Avvio inserimento dati in TimescaleDB per {num_records_generated} record...")
+            print(f"\n Avvio dell'inserimento dati in TimescaleDB per {num_records_generated} record....")
 
             # INIZIO DEL COUNTER
             start_time_ts = time.perf_counter()
@@ -124,13 +124,13 @@ def run_test(num_records_generated):
             
             duration_ts = (end_time_ts - start_time_ts)
             throughput_ts = (num_records_generated / duration_ts) if duration_ts > 0 else 0
-            print(f" TimescaleDB - Completato. Tempo: {duration_ts:.2f} s, Throughput: {throughput_ts:.2f} r/s")
+            print(f" TimescaleDB --> Completato. Tempo: {duration_ts:.2f} s, Throughput: {throughput_ts:.2f} r/s")
 
         except Exception as e:
-            # Cattura qualsiasi errore imprevisto durante l'inserimento in TimescaleDB
-            print(f" Errore critico durante l'inserimento in TimescaleDB: {e}")
+            
+            print(f" Errore durante l'inserimento in TimescaleDB: {e}")
         finally:
-            # QUESTO BLOCCO GARANTISCE LA CHIUSURA
+            
             if ts_conn:
                 print("Chiusura della connessione TimescaleDB.")
                 ts_conn.close()
