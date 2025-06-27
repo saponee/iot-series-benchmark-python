@@ -41,37 +41,32 @@ QUERIES_FLUX = {
           |> count()
           |> rename(columns : {{_value:"devices_counted"}})
     ''',
-    "days_of_max_temperature":
+    "join_counter":
     f'''
-    timeRange = -14d
-    maxTemp = from(bucket: "{bucket}")
-  |> range(start: timeRange)
-  |> filter(fn: (r) =>
-    r._measurement == "sensor_data" and
-    r._field == "temperature"
-  )
-  |> group(columns: ["device"])
-  |> max(column: "_value")
-  |> rename(columns:{{_value: "max_temp"}})
+  temp = from(bucket: "{bucket}")
+  |> range(start: -14d)
+  |> filter(fn: (r) => r._measurement == "sensor_data" and r._field == "temperature")
+  |> aggregateWindow(every: 1m, fn: max, createEmpty: false)
+  |> rename(columns: {{_value: "max_temperature"}})
 
-temperature_data = from(bucket: "{bucket}")
-  |> range(start: timeRange)
-  |> filter(fn: (r) =>
-    r._measurement == "sensor_data" and
-    r._field == "temperature"
-  )
+hum = from(bucket: "{bucket}")
+  |> range(start: -14d)
+  |> filter(fn: (r) => r._measurement == "sensor_data" and r._field == "humidity")
+  |> aggregateWindow(every: 1m, fn: max, createEmpty: false)
+  |> rename(columns: {{_value: "max_humidity"}})
 
-table_joined = join(
-  tables: {{temperature_data: temperature_data, max: maxTemp}},
-  on: ["device"]
+joined = join(
+  tables: {{t: temp, h: hum}},
+  on: ["_time", "device"],
+  method: "inner"
 )
-result = table_joined
-  |> filter(fn: (r) => r._value == r.max_temp)
-  |> keep(columns: ["device", "_time", "_value"])
-  |> rename(columns: {{_value: "temperature"}})
+  |> keep(columns: ["_time", "device", "max_temperature", "max_humidity"])
 
-result
-  |> yield(name: "max_temperature_date")
+joined
+  |> group(columns: ["device"])
+  |> count(column: "max_temperature")
+  |> rename(columns: {{max_temperature: "counter"}}
+  )
 
 '''
 }
@@ -84,12 +79,12 @@ QUERIES_TS = {
         FROM sensors
         WHERE time >= NOW() - INTERVAL '14 days'
         GROUP BY device_per_hour, device
-        ORDER BY device_per_hour, device;''',
+        ORDER BY  device;''',
 
     "mean_humidity":
     '''
     SELECT device,
-        AVG(humidity) AS mean_humidity
+    AVG(humidity) AS mean_humidity
     FROM sensors
     WHERE time >= NOW() - INTERVAL '14 days'
     GROUP BY device;
@@ -102,25 +97,48 @@ QUERIES_TS = {
     GROUP BY device;
     '''
     ,
-    "days_of_max_temperature":
+    "join_counter":
+
     '''
-    WITH max_values AS (
-  SELECT 
-    device,
-    MAX(temperature) AS max_temp
-  FROM sensors
-  WHERE time >= NOW() - INTERVAL '14 days'
-  GROUP BY device
+    WITH max_temp AS (
+    SELECT 
+        time_bucket('1 minutes', time) AS bucket,
+        device,
+        MAX(temperature) AS max_temperature
+    FROM sensors
+    WHERE time > now() - interval '14 days'
+    GROUP BY bucket, device
+),
+
+max_hum AS (
+    SELECT 
+        time_bucket('1 minutes', time) AS bucket,
+        device,
+        MAX(humidity) AS max_humidity
+    FROM sensors
+    WHERE time > now() - interval '14 days'
+    GROUP BY bucket, device
+),
+
+joined AS (
+    SELECT 
+        t.bucket, 
+        t.device
+    FROM max_temp t
+    JOIN max_hum h
+        ON t.bucket = h.bucket
+        AND t.device = h.device
 )
 
-SELECT s.device, s.time, s.temperature
-FROM sensors s
-JOIN max_values mv
-  ON s.device = mv.device
-WHERE 
-  s.time >= NOW() - INTERVAL '14 days' AND
-  s.temperature = mv.max_temp;
+SELECT
+    device,
+    COUNT(*) AS counter
+FROM joined
+GROUP BY device
+ORDER BY device;
     '''
+    
+    
 }
 
 def main():
